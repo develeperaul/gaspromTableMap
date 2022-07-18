@@ -3,7 +3,11 @@
     <div class="map__content-left column no-wrap justify-between">
       <div class="full-height relative-position" v-if="choice === 'map'">
         <div class="map__title text-center">
-          <b>Доля заявок, исполненных до границ, %</b>
+          <b v-if="sortProp === 'prop7'">Доля заключенных договоров, %</b>
+          <b v-else-if="sortProp === 'prop9'"
+            >Доля заявок, исполненных до границ, %</b
+          >
+          <b v-else-if="sortProp === 'prop11'">Доля подключенных, %</b>
         </div>
         <!-- <q-skeleton height="100%" v-if="isLoading" /> -->
         <Map :array="mergeCounts" />
@@ -80,7 +84,7 @@
       </div>
     </div>
     <div class="map__content-right flex column" v-if="choice === 'map'">
-      <div class="text-center q-mb-lg">
+      <div class="text-center q-mb-xl">
         <b class="relative-position">
           <q-btn
             v-if="district"
@@ -92,11 +96,11 @@
           {{ name }}
         </b>
       </div>
-      <div class="cards">
+      <div class="cards q-mt-xl q-mb-xl">
         <div class="text-center">
           <q-card flat bordered style="width: 100%">
             <q-card-section>
-              <div class="card-title">Количество ИЖС</div>
+              <div class="card-title">Количество принятых заявок</div>
             </q-card-section>
 
             <q-separator />
@@ -104,7 +108,7 @@
             <q-card-section>
               <q-skeleton v-if="isLoading" type="rect" />
               <template v-else>
-                <b> {{ $filters.prettyAmount(String(ihs)) }} </b>
+                <b> {{ ihs }} </b>
               </template>
             </q-card-section>
           </q-card>
@@ -115,9 +119,18 @@
           </div> -->
         </div>
         <div class="text-center">
-          <q-card flat bordered style="width: 100%">
+          <q-card
+            flat
+            bordered
+            style="width: 100%"
+            @click="updateCard('prop7')"
+            :style="!district ? { cursor: 'pointer' } : ''"
+          >
             <q-card-section>
-              <div class="card-title">Принято заявок, %</div>
+              <div class="card-title">
+                Количество заключенных договоров <br />
+                (% от принятых заявок)
+              </div>
             </q-card-section>
 
             <q-separator />
@@ -132,9 +145,18 @@
         </div>
 
         <div class="text-center q-mb-md">
-          <q-card flat bordered style="width: 100%">
+          <q-card
+            flat
+            bordered
+            style="width: 100%"
+            @click="updateCard('prop9')"
+            :style="!district ? { cursor: 'pointer' } : ''"
+          >
             <q-card-section>
-              <div class="card-title">Исполнено до границ, %</div>
+              <div class="card-title">
+                Количество исполненных до границ <br />
+                (% от заключенных договоров)
+              </div>
             </q-card-section>
 
             <q-separator />
@@ -148,9 +170,18 @@
           </q-card>
         </div>
         <div class="text-center q-mb-md">
-          <q-card flat bordered style="width: 100%">
+          <q-card
+            flat
+            bordered
+            style="width: 100%"
+            @click="updateCard('prop11')"
+            :style="!district ? { cursor: 'pointer' } : ''"
+          >
             <q-card-section>
-              <div class="card-title">Подключено, %</div>
+              <div class="card-title">
+                Количество подключенных <br />
+                (% от заключенных договоров)
+              </div>
             </q-card-section>
 
             <q-separator />
@@ -171,7 +202,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from "vue";
+import Vue, { defineComponent, ref, computed, inject } from "vue";
 import Map from "src/components/CardMap.vue";
 import Table from "src/components/DataTable.vue";
 import ky from "ky";
@@ -186,11 +217,13 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const prettyAmount = inject("prettyAmount");
     const isLoading = ref(true);
     const choice = ref("map");
     const list = ref([]);
     const $q = useQuasar();
     const message = ref(null);
+    const sortProp = ref("prop9");
     const getDataRegions = async () => {
       try {
         isLoading.value = true;
@@ -233,17 +266,19 @@ export default defineComponent({
         return data.value[0][property];
       }
       if (data.value && data.value.length > 1) {
-        return list.value.reduce((a, b) => a + +b[property], 0);
+        return prettyAmount(
+          String(list.value.reduce((a, b) => a + +b[property], 0))
+        );
       }
     };
-    const average = (data, propertyFirst, property, divider) => {
+    const average = (data, secondProperty, property, divider = 63) => {
       if (data.value && data.value.length === 1) {
-        return data.value[0][propertyFirst];
+        return `${data.value[0][secondProperty]} (${data.value[0][property]}%)`;
       }
       if (data.value && data.value.length > 1) {
-        return Math.ceil(
-          (list.value.reduce((a, b) => a + +b[property], 0) / divider) * 100
-        );
+        return `${summ(data, secondProperty)} (${Math.ceil(
+          list.value.reduce((a, b) => a + +b[property], 0) / divider
+        )}%)`;
       }
     };
 
@@ -251,7 +286,7 @@ export default defineComponent({
       if (list.value.length === 0) return [];
       return list.value
 
-        .filter((item) => +item.prop9 < 25)
+        .filter((item) => +item[sortProp.value] < 25)
         .map((item) => {
           return { ...item, to25: true };
         });
@@ -260,7 +295,9 @@ export default defineComponent({
       if (list.value.length === 0) return [];
       return list.value
 
-        .filter((item) => +item.prop9 >= 25 && +item.prop9 < 50)
+        .filter(
+          (item) => +item[sortProp.value] >= 25 && +item[sortProp.value] < 50
+        )
         .map((item) => {
           return { ...item, to25from50: true };
         });
@@ -269,7 +306,7 @@ export default defineComponent({
       if (list.value.length === 0) return [];
       return list.value
 
-        .filter((item) => +item.prop9 > 50)
+        .filter((item) => +item[sortProp.value] > 50)
         .map((item) => {
           return { ...item, to50: true };
         });
@@ -367,20 +404,25 @@ export default defineComponent({
     });
 
     const ihs = computed(() => {
-      return summ(data, "prop3");
+      return summ(data, "prop4");
     });
+
+    const updateCard = (property) => {
+      if (!props.district) sortProp.value = property;
+    };
     return {
+      prettyAmount,
       isLoading,
       data,
       ihs,
       accepted: computed(() => {
-        return average(data, "prop5", "prop4", ihs.value);
+        return average(data, "prop6", "prop7");
       }),
       executedLimit: computed(() => {
-        return average(data, "prop9", "prop8", summ(data, "prop6"));
+        return average(data, "prop8", "prop9");
       }),
       connections: computed(() => {
-        return average(data, "prop11", "prop10", summ(data, "prop6"));
+        return average(data, "prop10", "prop11");
       }),
       name: computed(() => {
         if (data.value && data.value.length === 1) {
@@ -399,6 +441,8 @@ export default defineComponent({
       ]),
       columns,
       rows,
+      sortProp,
+      updateCard,
     };
   },
   components: {
@@ -443,7 +487,7 @@ export default defineComponent({
   font-weight: 700;
   text-align: left;
 
-  width: 200px;
+  width: 170px;
   position: absolute;
   left: 80px;
   bottom: 0;
@@ -460,15 +504,20 @@ export default defineComponent({
   @media (max-width: 780px) {
     gap: 5px;
   }
+  & > div {
+    font-size: 16px;
+    @media (max-width: 780px) {
+      font-size: 12px;
+    }
+  }
 }
 .ratios__region-count {
   font-weight: 500;
-  padding: 20px 4px;
-
+  padding: 15px 4px;
   color: #fff;
   background-color: red;
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -520,6 +569,10 @@ export default defineComponent({
 }
 .card-title {
   font-size: 18px;
+  min-height: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   @media (max-width: 780px) {
     font-size: 10px;
   }
