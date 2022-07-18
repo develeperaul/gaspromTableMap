@@ -3,43 +3,29 @@
     <div class="map__content-left column no-wrap justify-between">
       <div class="full-height relative-position" v-if="choice === 'map'">
         <div class="map__title text-center">
-          <b v-if="sortProp === 'prop7'">Доля заключенных договоров, %</b>
-          <b v-else-if="sortProp === 'prop9'"
-            >Доля заявок, исполненных до границ, %</b
-          >
+          <b v-if="sortProp === 'prop7'">Доля заключенных <br> договоров, %</b>
+          <b v-else-if="sortProp === 'prop9'">Доля заявок, <br> исполненных до границ, %</b>
           <b v-else-if="sortProp === 'prop11'">Доля подключенных, %</b>
         </div>
         <!-- <q-skeleton height="100%" v-if="isLoading" /> -->
         <Map :array="mergeCounts" />
         <div class="ratios">
           <div class="ratios__item">
-            <div
-              v-if="countTo50"
-              class="ratios__region-count"
-              style="background: #17375e"
-            >
+            <div v-if="countTo50" class="ratios__region-count" style="background: #17375e">
               <!-- {{ countTo50.length }} -->
             </div>
             <div>Более 50%</div>
           </div>
           <q-separator></q-separator>
           <div class="ratios__item">
-            <div
-              v-if="count25from50"
-              class="ratios__region-count"
-              style="background: #558dd6"
-            >
+            <div v-if="count25from50" class="ratios__region-count" style="background: #558dd6">
               <!-- {{ count25from50.length }} -->
             </div>
             <div>25-50%</div>
           </div>
           <q-separator></q-separator>
           <div class="ratios__item">
-            <div
-              v-if="countTo25"
-              class="ratios__region-count"
-              style="background: #8eb4e3"
-            >
+            <div v-if="countTo25" class="ratios__region-count" style="background: #8eb4e3">
               <!-- {{ countTo25.length }} -->
             </div>
             <div>Менее 25%</div>
@@ -47,52 +33,26 @@
         </div>
       </div>
 
-      <q-table
-        v-if="choice === 'table'"
-        class="my-sticky-dynamic"
-        :rows="rows"
-        :columns="columns"
-        row-key="name"
-        :rows-per-page-options="[0]"
-        hide-bottom
-      >
+      <q-table v-if="choice === 'table'" class="my-sticky-dynamic" :rows="rows" :columns="columns" row-key="name"
+        :rows-per-page-options="[0]" hide-bottom>
         <template v-slot:header="props">
           <q-tr :props="props">
-            <q-th
-              v-for="col in props.cols"
-              :key="col.name"
-              :props="props"
-              v-html="col.label"
-            >
+            <q-th v-for="col in props.cols" :key="col.name" :props="props" v-html="col.label">
             </q-th>
           </q-tr>
         </template>
       </q-table>
-      <div class="btn-group">
-        <q-btn
-          :color="choice === 'map' ? 'primary' : 'white'"
-          :text-color="choice === 'map' ? '' : 'black'"
-          label="Карта"
-          @click="choice = 'map'"
-        />
-        <q-btn
-          :color="choice === 'table' ? 'primary' : 'white'"
-          :text-color="choice === 'table' ? '' : 'black'"
-          label="Таблица"
-          @click="choice = 'table'"
-        />
+      <div class="btn-group" v-if="choice === 'table'">
+        <q-btn :color="choice === 'map' ? 'primary' : 'white'" :text-color="choice === 'map' ? '' : 'black'"
+          label="Карта" @click="choice = 'map'" />
+        <q-btn :color="choice === 'table' ? 'primary' : 'white'" :text-color="choice === 'table' ? '' : 'black'"
+          label="Таблица" @click="choice = 'table'" />
       </div>
     </div>
     <div class="map__content-right flex column" v-if="choice === 'map'">
       <div class="text-center q-mb-xl">
-        <b class="relative-position">
-          <q-btn
-            v-if="district"
-            color="primary"
-            icon="home"
-            @click="$router.push({ path: '/' })"
-            class="button-home"
-          />
+        <b class="relative-position" style="font-size: 35px;">
+          <q-btn v-if="district" color="primary" icon="home" @click="$router.push({ path: '/' })" class="button-home" />
           {{ name }}
         </b>
       </div>
@@ -119,13 +79,8 @@
           </div> -->
         </div>
         <div class="text-center">
-          <q-card
-            flat
-            bordered
-            style="width: 100%"
-            @click="updateCard('prop7')"
-            :style="!district ? { cursor: 'pointer' } : ''"
-          >
+          <q-card flat bordered style="width: 100%" @click="updateCard('prop7')"
+            :style="!district ? { cursor: 'pointer' } : ''">
             <q-card-section>
               <div class="card-title">
                 Количество заключенных договоров <br />
@@ -145,13 +100,8 @@
         </div>
 
         <div class="text-center q-mb-md">
-          <q-card
-            flat
-            bordered
-            style="width: 100%"
-            @click="updateCard('prop9')"
-            :style="!district ? { cursor: 'pointer' } : ''"
-          >
+          <q-card flat  style="width: 100%" @click="updateCard('prop9')"
+            :style="!district ? { cursor: 'pointer' } : ''">
             <q-card-section>
               <div class="card-title">
                 Количество исполненных до границ <br />
@@ -170,13 +120,8 @@
           </q-card>
         </div>
         <div class="text-center q-mb-md">
-          <q-card
-            flat
-            bordered
-            style="width: 100%"
-            @click="updateCard('prop11')"
-            :style="!district ? { cursor: 'pointer' } : ''"
-          >
+          <q-card flat bordered style="width: 100%" @click="updateCard('prop11')"
+            :style="!district ? { cursor: 'pointer' } : ''">
             <q-card-section>
               <div class="card-title">
                 Количество подключенных <br />
@@ -195,7 +140,12 @@
           </q-card>
         </div>
       </div>
-
+      <div class="btn-group" style="justify-content: center;">
+        <q-btn :color="choice === 'map' ? 'primary' : 'white'" :text-color="choice === 'map' ? '' : 'black'"
+          label="Карта" @click="choice = 'map'" />
+        <q-btn :color="choice === 'table' ? 'primary' : 'white'" :text-color="choice === 'table' ? '' : 'black'"
+          label="Таблица" @click="choice = 'table'" />
+      </div>
       <div class="row"></div>
     </div>
   </q-page>
@@ -206,7 +156,7 @@ import Vue, { defineComponent, ref, computed, inject } from "vue";
 import Map from "src/components/CardMap.vue";
 import Table from "src/components/DataTable.vue";
 import ky from "ky";
-// import json from "/public/data/data.json";
+import json from "/public/data/data.json";
 import { useQuasar } from "quasar";
 export default defineComponent({
   name: "Region",
@@ -216,7 +166,7 @@ export default defineComponent({
       default: "",
     },
   },
-  setup(props) {
+  setup (props) {
     const prettyAmount = inject("prettyAmount");
     const isLoading = ref(true);
     const choice = ref("map");
@@ -227,8 +177,8 @@ export default defineComponent({
     const getDataRegions = async () => {
       try {
         isLoading.value = true;
-        const res = await ky("/api/list.php").json();
-        // const res = json;
+        // const res = await ky("/api/list.php").json();
+        const res = json;
         if (res.length === 0) {
           $q.notify({
             type: "negative",
@@ -452,14 +402,17 @@ export default defineComponent({
 });
 </script>
 <style scoped lang="scss">
+
 .map__content {
   display: flex;
   padding: 50px 100px;
+
   @media (max-width: 780px) {
     padding: 20px;
     flex-direction: column;
     gap: 20px;
   }
+
   &-right,
   &-left {
     width: 100%;
@@ -473,11 +426,13 @@ export default defineComponent({
 .map__title {
   margin-bottom: 20px;
   font-size: 38px;
+
   @media (max-width: 780px) {
     margin-bottom: 15px;
     font-size: 14px;
   }
 }
+
 .ratios {
   // display: grid;
   // grid-template-columns: repeat(3, minmax(0, 135px));
@@ -489,7 +444,7 @@ export default defineComponent({
 
   width: 170px;
   position: absolute;
-  left: 80px;
+  left: 180px;
   bottom: 0;
 
   @media (max-width: 780px) {
@@ -497,20 +452,25 @@ export default defineComponent({
     width: 100px;
   }
 }
+
 .ratios__item {
   display: flex;
   align-items: center;
   gap: 20px;
+
   @media (max-width: 780px) {
     gap: 5px;
   }
-  & > div {
+
+  &>div {
     font-size: 16px;
+
     @media (max-width: 780px) {
       font-size: 12px;
     }
   }
 }
+
 .ratios__region-count {
   font-weight: 500;
   padding: 15px 4px;
@@ -521,12 +481,14 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
+
   @media (max-width: 780px) {
     padding: 2px;
     height: 16px;
     width: 16px;
   }
 }
+
 .my-sticky-dynamic {
   /* height or max-height is important */
   max-height: 600px;
@@ -534,7 +496,10 @@ export default defineComponent({
 
   .q-table__top,
   .q-table__bottom,
-  thead tr:first-child th /* bg color is important for th; just specify one */ {
+  thead tr:first-child th
+
+    /* bg color is important for th; just specify one */
+    {
     background-color: #fff;
   }
 
@@ -542,37 +507,45 @@ export default defineComponent({
     position: sticky;
     z-index: 1;
   }
+
   /* this will be the loading indicator */
   thead tr:last-child th
-    /* height of all previous header rows */ {
+
+  /* height of all previous header rows */
+    {
     top: 48px;
   }
+
   thead tr:first-child th {
     top: 0;
   }
 }
+
 .button-home {
   position: absolute;
   left: 0;
-  transform: translateX(calc(-100% - 20px));
+    transform: translate(calc(-100% - 10px), -50%);
+    top: 50%;
   @media (max-width: 780px) {
     font-size: 10px;
-    top: 50%;
     padding: 5px;
     transform: translate(calc(-100% - 10px), -50%);
   }
 }
+
 .cards {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 30px;
 }
+
 .card-title {
   font-size: 18px;
   min-height: 50px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+
   @media (max-width: 780px) {
     font-size: 10px;
   }
@@ -582,11 +555,13 @@ export default defineComponent({
   display: flex;
   gap: 20px;
   margin-top: 30px;
+
   @media (max-width: 780px) {
     margin-top: 10px;
     gap: 5px;
   }
-  & > button {
+
+  &>button {
     @media (max-width: 780px) {
       font-size: 10px;
     }
