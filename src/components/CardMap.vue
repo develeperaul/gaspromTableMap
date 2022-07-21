@@ -43,7 +43,7 @@
         <circle
           :cx="district.circle?.x"
           :cy="district.circle?.y"
-          r="5"
+          :r="district.circle?.x && district.circle?.y ? 5 : 0"
           :fill="district.to50 ? 'white' : 'black'"
         />
       </g>

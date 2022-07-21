@@ -3,63 +3,122 @@
     <div class="map__content-left column no-wrap justify-between">
       <div class="full-height relative-position" v-if="choice === 'map'">
         <div class="map__title text-center">
-          <b v-if="sortProp === 'prop7'">Доля заключенных <br> договоров, %</b>
-          <b v-else-if="sortProp === 'prop9'">Доля заявок, <br> исполненных до границ, %</b>
-          <b v-else-if="sortProp === 'prop11'">Доля подключенных, %</b>
+          <b v-if="sortProp === 'prop4'"><br />Количество принятых заявок</b>
+          <b v-else-if="sortProp === 'prop7'"
+            >Доля заключенных <br />
+            договоров, %</b
+          >
+          <b v-else-if="sortProp === 'prop9'"
+            >Доля заявок, <br />
+            исполненных до границ, %</b
+          >
+          <b v-else-if="sortProp === 'prop11'"> <br />Доля подключенных, % </b>
+          <b v-else-if="sortProp === 'prop13'">
+            Доля комлексных <br />
+            договоров, %
+          </b>
         </div>
-        <!-- <q-skeleton height="100%" v-if="isLoading" /> -->
         <Map :array="mergeCounts" />
         <div class="ratios">
           <div class="ratios__item">
-            <div v-if="countTo50" class="ratios__region-count" style="background: #17375e">
+            <div
+              v-if="countTo50"
+              class="ratios__region-count"
+              style="background: #17375e"
+            >
               <!-- {{ countTo50.length }} -->
             </div>
-            <div>Более 50%</div>
+            <div>
+              более
+              {{
+                sortProp === "prop4" ? legendData.last : `${legendData.last}%`
+              }}
+            </div>
           </div>
           <q-separator></q-separator>
           <div class="ratios__item">
-            <div v-if="count25from50" class="ratios__region-count" style="background: #558dd6">
+            <div
+              v-if="count25from50"
+              class="ratios__region-count"
+              style="background: #558dd6"
+            >
               <!-- {{ count25from50.length }} -->
             </div>
-            <div>25-50%</div>
+            <div>
+              {{
+                sortProp === "prop4"
+                  ? `${legendData.first}-${legendData.last}`
+                  : `${legendData.first}-${legendData.last}%`
+              }}
+            </div>
           </div>
           <q-separator></q-separator>
           <div class="ratios__item">
-            <div v-if="countTo25" class="ratios__region-count" style="background: #8eb4e3">
+            <div
+              v-if="countTo25"
+              class="ratios__region-count"
+              style="background: #8eb4e3"
+            >
               <!-- {{ countTo25.length }} -->
             </div>
-            <div>Менее 25%</div>
+            <div>
+              менее
+              {{
+                sortProp === "prop4" ? legendData.first : `${legendData.first}%`
+              }}
+            </div>
           </div>
         </div>
       </div>
-
-      <q-table v-if="choice === 'table'" class="my-sticky-dynamic" :rows="rows" :columns="columns" row-key="name"
-        :rows-per-page-options="[0]" hide-bottom>
-        <template v-slot:header="props">
-          <q-tr :props="props">
-            <q-th v-for="col in props.cols" :key="col.name" :props="props" v-html="col.label">
-            </q-th>
-          </q-tr>
-        </template>
-      </q-table>
+      <TableData v-if="choice === 'table'" :rowRb="rowRb" :list="list" />
       <div class="btn-group" v-if="choice === 'table'">
-        <q-btn :color="choice === 'map' ? 'primary' : 'white'" :text-color="choice === 'map' ? '' : 'black'"
-          label="Карта" @click="choice = 'map'" />
-        <q-btn :color="choice === 'table' ? 'primary' : 'white'" :text-color="choice === 'table' ? '' : 'black'"
-          label="Таблица" @click="choice = 'table'" />
+        <q-btn
+          :color="choice === 'map' ? 'primary' : 'white'"
+          :text-color="choice === 'map' ? '' : 'black'"
+          label="Карта"
+          @click="choice = 'map'"
+        />
+        <q-btn
+          :color="choice === 'table' ? 'primary' : 'white'"
+          :text-color="choice === 'table' ? '' : 'black'"
+          label="Таблица"
+          @click="choice = 'table'"
+        />
+        <q-btn color="primary" text-color="white">
+          <a :href="linkXML" download target="_blank">Выгрузить Excel</a>
+        </q-btn>
       </div>
     </div>
     <div class="map__content-right flex column" v-if="choice === 'map'">
-      <div class="text-center q-mb-xl">
-        <b class="relative-position" style="font-size: 35px;">
-          <q-btn v-if="district" color="primary" icon="home" @click="$router.push({ path: '/' })" class="button-home" />
-          {{ name }}
-        </b>
+      <div class="indicator-title q-mb-md" v-if="district">
+        <q-btn color="primary">
+          <b class="">
+            {{ name }}
+          </b>
+        </q-btn>
+        <q-btn
+          color="white"
+          text-color="black"
+          @click="$router.push({ path: '/' })"
+        >
+          <b class=""> Республика Башкортостан </b>
+        </q-btn>
+      </div>
+      <div class="q-mb-md text-center" v-else>
+        <b class="" style="font-size: 35px"> Республика Башкортостан </b>
       </div>
       <div class="cards q-mt-xl q-mb-xl">
-        <div class="text-center">
-          <q-card flat bordered style="width: 100%">
-            <q-card-section>
+        <div class="text-center card-center">
+          <q-card class="card" flat bordered style="width: 100%">
+            <q-card-section
+              class="card__top"
+              :class="{ 'card-title__button': !district }"
+              :style="[
+                !district ? { cursor: 'pointer' } : '',
+                sortProp == 'prop4' ? { 'background-color': '#fff' } : '',
+              ]"
+              @click="updateCard('prop4', 500, 1000)"
+            >
               <div class="card-title">Количество принятых заявок</div>
             </q-card-section>
 
@@ -72,16 +131,19 @@
               </template>
             </q-card-section>
           </q-card>
-
-          <!-- <div>Количество ИЖС</div>
-          <div>
-            <b> {{ ihs }} </b>
-          </div> -->
         </div>
+
         <div class="text-center">
-          <q-card flat bordered style="width: 100%" @click="updateCard('prop7')"
-            :style="!district ? { cursor: 'pointer' } : ''">
-            <q-card-section>
+          <q-card class="card" flat bordered style="width: 100%">
+            <q-card-section
+              class="card-title"
+              :class="{ 'card-title__button': !district }"
+              :style="[
+                !district ? { cursor: 'pointer' } : '',
+                sortProp == 'prop7' ? { 'background-color': '#fff' } : '',
+              ]"
+              @click="updateCard('prop7', 90, 95)"
+            >
               <div class="card-title">
                 Количество заключенных договоров <br />
                 (% от принятых заявок)
@@ -98,11 +160,44 @@
             </q-card-section>
           </q-card>
         </div>
+        <div class="text-center">
+          <q-card class="card" flat bordered style="width: 100%">
+            <q-card-section
+              class="card__top"
+              :class="{ 'card-title__button': !district }"
+              @click="updateCard('prop13', 25, 75)"
+              :style="[
+                !district ? { cursor: 'pointer' } : '',
+                sortProp == 'prop13' ? { 'background-color': '#fff' } : '',
+              ]"
+            >
+              <div class="card-title">
+                Количество комплексных договоров <br />
+                (% от заключенных договоров)
+              </div>
+            </q-card-section>
 
-        <div class="text-center q-mb-md">
-          <q-card flat  style="width: 100%" @click="updateCard('prop9')"
-            :style="!district ? { cursor: 'pointer' } : ''">
+            <q-separator />
+
             <q-card-section>
+              <q-skeleton v-if="isLoading" type="rect" />
+              <template v-else>
+                <b> {{ complex }} </b>
+              </template>
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="text-center q-mb-md">
+          <q-card class="card" flat style="width: 100%">
+            <q-card-section
+              class="card-title"
+              :class="{ 'card-title__button': !district }"
+              @click="updateCard('prop9')"
+              :style="[
+                !district ? { cursor: 'pointer' } : '',
+                sortProp == 'prop9' ? { 'background-color': '#fff' } : '',
+              ]"
+            >
               <div class="card-title">
                 Количество исполненных до границ <br />
                 (% от заключенных договоров)
@@ -120,9 +215,16 @@
           </q-card>
         </div>
         <div class="text-center q-mb-md">
-          <q-card flat bordered style="width: 100%" @click="updateCard('prop11')"
-            :style="!district ? { cursor: 'pointer' } : ''">
-            <q-card-section>
+          <q-card class="card" flat bordered style="width: 100%">
+            <q-card-section
+              class="card-title"
+              :class="{ 'card-title__button': !district }"
+              @click="updateCard('prop11')"
+              :style="[
+                !district ? { cursor: 'pointer' } : '',
+                sortProp == 'prop11' ? { 'background-color': '#fff' } : '',
+              ]"
+            >
               <div class="card-title">
                 Количество подключенных <br />
                 (% от заключенных договоров)
@@ -140,11 +242,21 @@
           </q-card>
         </div>
       </div>
-      <div class="btn-group" style="justify-content: center;">
-        <q-btn :color="choice === 'map' ? 'primary' : 'white'" :text-color="choice === 'map' ? '' : 'black'"
-          label="Карта" @click="choice = 'map'" />
-        <q-btn :color="choice === 'table' ? 'primary' : 'white'" :text-color="choice === 'table' ? '' : 'black'"
-          label="Таблица" @click="choice = 'table'" />
+      <q-skeleton v-if="isLoadingDate" type="rect" width="150px" />
+      <p v-else>По состоянию на {{ date }}</p>
+      <div class="btn-group" style="justify-content: center">
+        <q-btn
+          :color="choice === 'map' ? 'primary' : 'white'"
+          :text-color="choice === 'map' ? '' : 'black'"
+          label="Карта"
+          @click="choice = 'map'"
+        />
+        <q-btn
+          :color="choice === 'table' ? 'primary' : 'white'"
+          :text-color="choice === 'table' ? '' : 'black'"
+          label="Таблица"
+          @click="choice = 'table'"
+        />
       </div>
       <div class="row"></div>
     </div>
@@ -154,9 +266,10 @@
 <script>
 import Vue, { defineComponent, ref, computed, inject } from "vue";
 import Map from "src/components/CardMap.vue";
-import Table from "src/components/DataTable.vue";
+import TableData from "src/components/TableData.vue";
 import ky from "ky";
-import json from "/public/data/data.json";
+// import json from "/public/data/data.json";
+import useResultProperties from "src/compositions/useResultProperties.js";
 import { useQuasar } from "quasar";
 export default defineComponent({
   name: "Region",
@@ -166,25 +279,47 @@ export default defineComponent({
       default: "",
     },
   },
-  setup (props) {
+  setup(props) {
     const prettyAmount = inject("prettyAmount");
     const isLoading = ref(true);
+    const isLoadingDate = ref(true);
     const choice = ref("map");
     const list = ref([]);
+    const rowRb = ref({});
+    const date = ref(null);
+    const linkXML = ref(null);
     const $q = useQuasar();
     const message = ref(null);
     const sortProp = ref("prop9");
+    const legendData = ref({
+      first: 25,
+      last: 50,
+    });
     const getDataRegions = async () => {
       try {
         isLoading.value = true;
+        isLoadingDate.value = true;
         // const res = await ky("/api/list.php").json();
-        const res = json;
+        const requests = await Promise.all([
+          ky("/api/date.php").json(),
+          ky("/api/list.php").json(),
+          ky("/api/export.php").json(),
+        ]);
+
+        date.value = requests[0][0].date;
+        // const date = await ky("http://gazstat.danat.su/api/date.php").json();
+        // date.value = requests[0].date
+        console.log(requests[1]);
+        const res = requests[1];
         if (res.length === 0) {
           $q.notify({
             type: "negative",
             message: "Данные не заполнены!",
           });
         }
+        linkXML.value = requests[2][0].url;
+        const { row } = useResultProperties(res);
+        rowRb.value = row;
         list.value = res;
         return res;
       } catch (e) {
@@ -192,11 +327,12 @@ export default defineComponent({
       } finally {
         if (list.value.length === 0) isLoading.value = true;
         else isLoading.value = false;
+        if (list.value.length === 0) isLoadingDate.value = true;
+        else isLoadingDate.value = false;
       }
     };
 
     getDataRegions();
-
     const data = computed(() => {
       const district = props.district;
       if (list.value.length === 0) return null;
@@ -221,14 +357,20 @@ export default defineComponent({
         );
       }
     };
-    const average = (data, secondProperty, property, divider = 63) => {
+    // const average = (data, secondProperty, property, divider = 63) => {
+    const average = (data, secondProperty, property) => {
       if (data.value && data.value.length === 1) {
         return `${data.value[0][secondProperty]} (${data.value[0][property]}%)`;
       }
       if (data.value && data.value.length > 1) {
-        return `${summ(data, secondProperty)} (${Math.ceil(
-          list.value.reduce((a, b) => a + +b[property], 0) / divider
-        )}%)`;
+        console.log(secondProperty);
+        return `${summ(data, secondProperty)}
+         (${Math.ceil(
+           (list.value.reduce((a, b) => a + +b[secondProperty], 0) /
+             list.value.reduce((a, b) => a + +b[property], 0)) *
+             100
+           // list.value.reduce((a, b) => a + +b[property], 0) / divider
+         )}%)`;
       }
     };
 
@@ -236,7 +378,7 @@ export default defineComponent({
       if (list.value.length === 0) return [];
       return list.value
 
-        .filter((item) => +item[sortProp.value] < 25)
+        .filter((item) => +item[sortProp.value] < legendData.value.first)
         .map((item) => {
           return { ...item, to25: true };
         });
@@ -246,7 +388,9 @@ export default defineComponent({
       return list.value
 
         .filter(
-          (item) => +item[sortProp.value] >= 25 && +item[sortProp.value] < 50
+          (item) =>
+            +item[sortProp.value] >= legendData.value.first &&
+            +item[sortProp.value] < legendData.value.last
         )
         .map((item) => {
           return { ...item, to25from50: true };
@@ -256,123 +400,45 @@ export default defineComponent({
       if (list.value.length === 0) return [];
       return list.value
 
-        .filter((item) => +item[sortProp.value] > 50)
+        .filter((item) => +item[sortProp.value] > legendData.value.last)
         .map((item) => {
           return { ...item, to50: true };
         });
-    });
-
-    const columns = [
-      {
-        name: "name",
-        required: true,
-        label: "Район,город",
-        align: "left",
-        field: (row) => row.name,
-        format: (val) => `${val}`,
-        sortable: true,
-      },
-      {
-        name: "prop2",
-        align: "center",
-        label: "Количество <br/> земельных <br/> участков",
-        field: (row) => row.prop2,
-        format: (val) => `${val}`,
-        sortable: true,
-      },
-      {
-        name: "prop3",
-        align: "center",
-        label: "Количество <br/> ИЖС",
-        field: (row) => row.prop3,
-        sortable: true,
-      },
-      {
-        name: "prop4",
-        align: "center",
-        label: "Количество <br/> принятых <br/> заявок",
-        field: (row) => row.prop4,
-        sortable: true,
-      },
-      {
-        name: "prop5",
-        align: "center",
-        label: "% от <br/> количества <br/> ИЖС",
-        // label: "Количество <br/> заключенных <br/> договоров",
-        field: (row) => row.prop5,
-        sortable: true,
-      },
-      {
-        name: "prop6",
-        align: "center",
-        label: "Количество <br/> заключенных <br/> договоров",
-        field: (row) => row.prop6,
-        sortable: true,
-      },
-      {
-        name: "prop7",
-        align: "center",
-        label: "% от <br/> принятых <br/> заявок",
-        field: (row) => row.prop7,
-        sortable: true,
-      },
-      {
-        name: "prop8",
-        align: "center",
-        label: "Количество <br/> исполненных <br/> до границ",
-        // label: "% от <br/> закл. дог.",
-        field: (row) => row.prop8,
-        sortable: true,
-      },
-      {
-        name: "prop9",
-        align: "center",
-        label: "% от <br/> закл. договоров",
-
-        field: (row) => row.prop9,
-        sortable: true,
-      },
-      {
-        name: "prop10",
-        align: "center",
-        label: "Количество <br/> подключенных",
-
-        field: (row) => row.prop10,
-        sortable: true,
-      },
-      {
-        name: "prop11",
-        align: "center",
-        label: "% от <br/> заключенных <br/> договоров",
-        field: (row) => row.prop11,
-        sortable: true,
-      },
-    ];
-    const rows = computed(() => {
-      if (list.value.length === 0) return null;
-      return list.value;
     });
 
     const ihs = computed(() => {
       return summ(data, "prop4");
     });
 
-    const updateCard = (property) => {
-      if (!props.district) sortProp.value = property;
+    const updateCard = (property, first = 25, last = 50) => {
+      if (!props.district) {
+        legendData.value = {
+          first,
+          last,
+        };
+        sortProp.value = property;
+      }
     };
+
     return {
+      linkXML,
       prettyAmount,
       isLoading,
+      isLoadingDate,
       data,
+      date,
       ihs,
       accepted: computed(() => {
-        return average(data, "prop6", "prop7");
+        return average(data, "prop6", "prop4");
       }),
       executedLimit: computed(() => {
-        return average(data, "prop8", "prop9");
+        return average(data, "prop8", "prop6");
+      }),
+      complex: computed(() => {
+        return average(data, "prop12", "prop6");
       }),
       connections: computed(() => {
-        return average(data, "prop10", "prop11");
+        return average(data, "prop10", "prop6");
       }),
       name: computed(() => {
         if (data.value && data.value.length === 1) {
@@ -389,20 +455,20 @@ export default defineComponent({
         ...count25from50.value,
         ...countTo50.value,
       ]),
-      columns,
-      rows,
       sortProp,
       updateCard,
+      list,
+      rowRb,
+      legendData,
     };
   },
   components: {
     Map,
-    Table,
+    TableData,
   },
 });
 </script>
 <style scoped lang="scss">
-
 .map__content {
   display: flex;
   padding: 50px 100px;
@@ -462,7 +528,7 @@ export default defineComponent({
     gap: 5px;
   }
 
-  &>div {
+  & > div {
     font-size: 16px;
 
     @media (max-width: 780px) {
@@ -498,8 +564,7 @@ export default defineComponent({
   .q-table__bottom,
   thead tr:first-child th
 
-    /* bg color is important for th; just specify one */
-    {
+    /* bg color is important for th; just specify one */ {
     background-color: #fff;
   }
 
@@ -511,8 +576,7 @@ export default defineComponent({
   /* this will be the loading indicator */
   thead tr:last-child th
 
-  /* height of all previous header rows */
-    {
+  /* height of all previous header rows */ {
     top: 48px;
   }
 
@@ -524,8 +588,8 @@ export default defineComponent({
 .button-home {
   position: absolute;
   left: 0;
-    transform: translate(calc(-100% - 10px), -50%);
-    top: 50%;
+  transform: translate(calc(-100% - 10px), -50%);
+  top: 50%;
   @media (max-width: 780px) {
     font-size: 10px;
     padding: 5px;
@@ -541,13 +605,17 @@ export default defineComponent({
 
 .card-title {
   font-size: 18px;
-  min-height: 50px;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
 
   @media (max-width: 780px) {
     font-size: 10px;
+  }
+  &__button {
+    border-radius: 50px !important;
+    background: #8eb4e3;
   }
 }
 
@@ -561,9 +629,41 @@ export default defineComponent({
     gap: 5px;
   }
 
-  &>button {
+  & > button {
     @media (max-width: 780px) {
       font-size: 10px;
+    }
+  }
+}
+
+.card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  &__top {
+    flex-grow: 1;
+  }
+  &-center {
+    grid-column: 2 span / 2 span;
+    place-self: center;
+  }
+}
+a {
+  text-decoration: none;
+  color: #fff;
+}
+.indicator-title {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 30px;
+  .button {
+  }
+  & > * {
+    font-size: 16px;
+
+    &:first-child {
+      justify-self: end;
     }
   }
 }
