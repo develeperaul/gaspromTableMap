@@ -3,7 +3,10 @@
     <div class="map__content-left column no-wrap justify-between">
       <div class="full-height relative-position" v-if="choice === 'map'">
         <div class="map__title text-center">
-          <b v-if="sortProp === 'prop4'"><br />Количество принятых заявок</b>
+          <b v-if="sortProp === 'prop4'"
+            >Количество принятых заявок <br />
+            <br
+          /></b>
           <b v-else-if="sortProp === 'prop7'"
             >Доля заключенных <br />
             договоров, %</b
@@ -12,9 +15,12 @@
             >Доля заявок, <br />
             исполненных до границ, %</b
           >
-          <b v-else-if="sortProp === 'prop11'"> <br />Доля подключенных, % </b>
+          <b v-else-if="sortProp === 'prop11'">
+            Доля подключенных, % <br />
+            <br />
+          </b>
           <b v-else-if="sortProp === 'prop13'">
-            Доля комлексных <br />
+            Доля комплексных <br />
             договоров, %
           </b>
         </div>
@@ -73,170 +79,160 @@
       <TableData v-if="choice === 'table'" :rowRb="rowRb" :list="list" />
       <div class="btn-group" v-if="choice === 'table'">
         <q-btn
-          :color="choice === 'map' ? 'primary' : 'white'"
-          :text-color="choice === 'map' ? '' : 'black'"
+          :color="choice === 'map' ? 'white' : 'primary'"
           label="Карта"
           @click="choice = 'map'"
         />
         <q-btn
-          :color="choice === 'table' ? 'primary' : 'white'"
-          :text-color="choice === 'table' ? '' : 'black'"
+          :color="choice === 'table' ? 'white' : 'primary'"
+          :text-color="choice === 'table' && 'black'"
           label="Таблица"
           @click="choice = 'table'"
         />
-        <q-btn color="primary" text-color="white">
+        <q-btn v-if="linkXML" color="primary" text-color="white">
           <a :href="linkXML" download target="_blank">Выгрузить Excel</a>
         </q-btn>
       </div>
     </div>
     <div class="map__content-right flex column" v-if="choice === 'map'">
       <div class="indicator-title q-mb-md" v-if="district">
-        <q-btn color="primary">
+        <q-btn color="primary" @click="$router.push({ path: '/' })">
+          <b class=""> Республика Башкортостан </b>
+        </q-btn>
+        <q-btn color="white" text-color="black">
           <b class="">
             {{ name }}
           </b>
         </q-btn>
-        <q-btn
-          color="white"
-          text-color="black"
-          @click="$router.push({ path: '/' })"
-        >
-          <b class=""> Республика Башкортостан </b>
-        </q-btn>
       </div>
       <div class="q-mb-md text-center" v-else>
-        <b class="" style="font-size: 35px"> Республика Башкортостан </b>
+        <b class="title"> Республика Башкортостан </b>
       </div>
-      <div class="cards q-mt-xl q-mb-xl">
+      <div class="cards">
         <div class="text-center card-center">
-          <q-card class="card" flat bordered style="width: 100%">
+          <q-card class="card bg-transparent" flat style="width: 100%">
             <q-card-section
-              class="card__top"
-              :class="{ 'card-title__button': !district }"
-              :style="[
-                !district ? { cursor: 'pointer' } : '',
-                sortProp == 'prop4' ? { 'background-color': '#fff' } : '',
+              class="card-title"
+              :class="[
+                { 'card-title__button': !district },
+                { active: sortProp == 'prop4' },
               ]"
+              :style="[!district ? { cursor: 'pointer' } : '']"
               @click="updateCard('prop4', 500, 1000)"
             >
-              <div class="card-title">Количество принятых заявок</div>
+              <!-- sortProp == 'prop4' ? { 'background-color': '#fff' } : '', -->
+              <div class="card-text">Количество принятых заявок</div>
             </q-card-section>
-
-            <q-separator />
 
             <q-card-section>
               <q-skeleton v-if="isLoading" type="rect" />
               <template v-else>
-                <b> {{ ihs }} </b>
+                <b class="numb"> {{ ihs }} </b>
               </template>
             </q-card-section>
           </q-card>
         </div>
 
         <div class="text-center">
-          <q-card class="card" flat bordered style="width: 100%">
+          <q-card class="card bg-transparent" flat style="width: 100%">
             <q-card-section
               class="card-title"
-              :class="{ 'card-title__button': !district }"
-              :style="[
-                !district ? { cursor: 'pointer' } : '',
-                sortProp == 'prop7' ? { 'background-color': '#fff' } : '',
+              :class="[
+                { 'card-title__button': !district },
+                { active: sortProp == 'prop7' },
               ]"
+              :style="[!district ? { cursor: 'pointer' } : '']"
               @click="updateCard('prop7', 90, 95)"
             >
-              <div class="card-title">
+              <!-- sortProp == 'prop7' ? { 'background-color': '#fff' } : '', -->
+              <div class="card-text">
                 Количество заключенных договоров <br />
                 (% от принятых заявок)
               </div>
             </q-card-section>
 
-            <q-separator />
-
             <q-card-section>
               <q-skeleton v-if="isLoading" type="rect" />
               <template v-else>
-                <b> {{ accepted }} </b>
+                <b class="numb"> {{ accepted }} </b>
               </template>
             </q-card-section>
           </q-card>
         </div>
         <div class="text-center">
-          <q-card class="card" flat bordered style="width: 100%">
+          <q-card class="card bg-transparent" flat style="width: 100%">
             <q-card-section
-              class="card__top"
-              :class="{ 'card-title__button': !district }"
-              @click="updateCard('prop13', 25, 75)"
-              :style="[
-                !district ? { cursor: 'pointer' } : '',
-                sortProp == 'prop13' ? { 'background-color': '#fff' } : '',
+              class="card-title"
+              :class="[
+                { 'card-title__button': !district },
+                { active: sortProp == 'prop13' },
               ]"
+              @click="updateCard('prop13', 25, 75)"
+              :style="[!district ? { cursor: 'pointer' } : '']"
             >
-              <div class="card-title">
+              <!-- sortProp == 'prop13' ? { 'background-color': '#fff' } : '', -->
+              <div class="card-text">
                 Количество комплексных договоров <br />
                 (% от заключенных договоров)
               </div>
             </q-card-section>
 
-            <q-separator />
-
             <q-card-section>
               <q-skeleton v-if="isLoading" type="rect" />
               <template v-else>
-                <b> {{ complex }} </b>
+                <b class="numb"> {{ complex }} </b>
               </template>
             </q-card-section>
           </q-card>
         </div>
         <div class="text-center q-mb-md">
-          <q-card class="card" flat style="width: 100%">
+          <q-card class="card bg-transparent" flat style="width: 100%">
             <q-card-section
               class="card-title"
-              :class="{ 'card-title__button': !district }"
-              @click="updateCard('prop9')"
-              :style="[
-                !district ? { cursor: 'pointer' } : '',
-                sortProp == 'prop9' ? { 'background-color': '#fff' } : '',
+              :class="[
+                { 'card-title__button': !district },
+                { active: sortProp == 'prop9' },
               ]"
+              @click="updateCard('prop9')"
+              :style="[!district ? { cursor: 'pointer' } : '']"
             >
-              <div class="card-title">
+              <!-- sortProp == 'prop9' ? { 'background-color': '#fff' } : '', -->
+              <div class="card-text">
                 Количество исполненных до границ <br />
                 (% от заключенных договоров)
               </div>
             </q-card-section>
 
-            <q-separator />
-
             <q-card-section>
               <q-skeleton v-if="isLoading" type="rect" />
               <template v-else>
-                <b> {{ executedLimit }} </b>
+                <b class="numb"> {{ executedLimit }} </b>
               </template>
             </q-card-section>
           </q-card>
         </div>
         <div class="text-center q-mb-md">
-          <q-card class="card" flat bordered style="width: 100%">
+          <q-card class="card bg-transparent" flat style="width: 100%">
             <q-card-section
               class="card-title"
-              :class="{ 'card-title__button': !district }"
-              @click="updateCard('prop11')"
-              :style="[
-                !district ? { cursor: 'pointer' } : '',
-                sortProp == 'prop11' ? { 'background-color': '#fff' } : '',
+              :class="[
+                { 'card-title__button': !district },
+                { active: sortProp == 'prop11' },
               ]"
+              @click="updateCard('prop11')"
+              :style="[!district ? { cursor: 'pointer' } : '']"
             >
-              <div class="card-title">
+              <!-- sortProp == 'prop11' ? { 'background-color': '#fff' } : '', -->
+              <div class="card-text">
                 Количество подключенных <br />
                 (% от заключенных договоров)
               </div>
             </q-card-section>
 
-            <q-separator />
-
             <q-card-section>
               <q-skeleton v-if="isLoading" type="rect" />
               <template v-else>
-                <b> {{ connections }} </b>
+                <b class="numb"> {{ connections }} </b>
               </template>
             </q-card-section>
           </q-card>
@@ -246,14 +242,13 @@
       <p v-else>По состоянию на {{ date }}</p>
       <div class="btn-group" style="justify-content: center">
         <q-btn
-          :color="choice === 'map' ? 'primary' : 'white'"
-          :text-color="choice === 'map' ? '' : 'black'"
+          :color="choice === 'map' ? 'white' : 'primary'"
+          :text-color="choice === 'map' && 'black'"
           label="Карта"
           @click="choice = 'map'"
         />
         <q-btn
-          :color="choice === 'table' ? 'primary' : 'white'"
-          :text-color="choice === 'table' ? '' : 'black'"
+          :color="choice === 'table' ? 'white' : 'primary'"
           label="Таблица"
           @click="choice = 'table'"
         />
@@ -317,7 +312,10 @@ export default defineComponent({
             message: "Данные не заполнены!",
           });
         }
-        linkXML.value = requests[2][0].url;
+        console.log(requests[2][0]);
+        if (requests[2][0]?.url) {
+          linkXML.value = requests[2][0].url;
+        }
         const { row } = useResultProperties(res);
         rowRb.value = row;
         list.value = res;
@@ -358,9 +356,9 @@ export default defineComponent({
       }
     };
     // const average = (data, secondProperty, property, divider = 63) => {
-    const average = (data, secondProperty, property) => {
+    const average = (data, secondProperty, property, propertyRegion) => {
       if (data.value && data.value.length === 1) {
-        return `${data.value[0][secondProperty]} (${data.value[0][property]}%)`;
+        return `${data.value[0][secondProperty]} (${data.value[0][propertyRegion]}%)`;
       }
       if (data.value && data.value.length > 1) {
         console.log(secondProperty);
@@ -429,16 +427,16 @@ export default defineComponent({
       date,
       ihs,
       accepted: computed(() => {
-        return average(data, "prop6", "prop4");
+        return average(data, "prop6", "prop4", "prop7");
       }),
       executedLimit: computed(() => {
-        return average(data, "prop8", "prop6");
+        return average(data, "prop8", "prop6", "prop9");
       }),
       complex: computed(() => {
-        return average(data, "prop12", "prop6");
+        return average(data, "prop12", "prop6", "prop13");
       }),
       connections: computed(() => {
-        return average(data, "prop10", "prop6");
+        return average(data, "prop10", "prop6", "prop11");
       }),
       name: computed(() => {
         if (data.value && data.value.length === 1) {
@@ -471,7 +469,7 @@ export default defineComponent({
 <style scoped lang="scss">
 .map__content {
   display: flex;
-  padding: 50px 100px;
+  padding: 25px 100px;
 
   @media (max-width: 780px) {
     padding: 20px;
@@ -511,7 +509,7 @@ export default defineComponent({
   width: 170px;
   position: absolute;
   left: 180px;
-  bottom: 0;
+  bottom: 15px;
 
   @media (max-width: 780px) {
     left: 0px;
@@ -600,22 +598,37 @@ export default defineComponent({
 .cards {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 30px;
+  gap: 20px 30px;
+  margin: 48px 0;
+  @media (max-width: 780px) {
+    gap: 8px 16px;
+    margin: 15px 0;
+  }
 }
 
 .card-title {
   font-size: 18px;
-  height: 100%;
+  height: 86px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background: #fff;
+  border-radius: 17px !important;
 
   @media (max-width: 780px) {
-    font-size: 10px;
+    border-radius: 8px !important;
+    font-size: 8px;
+    height: 35px;
   }
   &__button {
-    border-radius: 50px !important;
-    background: #8eb4e3;
+    background: #1976d2;
+    color: #fff;
+    box-shadow: 0 1px 5px rgb(0 0 0 / 20%), 0 2px 2px rgb(0 0 0 / 14%),
+      0 3px 1px -2px rgb(0 0 0 / 12%);
+    &.active {
+      background: #fff;
+      color: #000;
+    }
   }
 }
 
@@ -662,9 +675,27 @@ a {
   & > * {
     font-size: 16px;
 
-    &:first-child {
-      justify-self: end;
+    &:last-child {
+      justify-self: start;
     }
   }
 }
+
+.numb {
+  font-size: 25px;
+  @media (max-width: 780px) {
+    font-size: 16px;
+  }
+}
+.title {
+  font-size: 35px;
+  @media (max-width: 780px) {
+    font-size: 18px;
+  }
+}
+// .card-text {
+//   @media (max-width: 780px) {
+//     font-size: 8px;
+//   }
+// }
 </style>

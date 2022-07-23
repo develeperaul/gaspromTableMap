@@ -152,7 +152,7 @@ export default {
       {
         name: "prop12",
         align: "center",
-        label: "Количество <br/>  комлексных <br/> договоров",
+        label: "Количество <br/>  комплексных <br/> договоров",
 
         field: (row) => row.prop12,
         sortable: true,
@@ -190,7 +190,7 @@ export default {
   height: 100%;
 
   @media (max-width: 780px) {
-    max-height: 90vh;
+    max-height: 80vh;
   }
 
   .q-table__top,

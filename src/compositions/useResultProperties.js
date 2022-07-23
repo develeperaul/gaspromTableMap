@@ -29,7 +29,7 @@ export default function async(list) {
     prop3: summProperty("prop3"),
     prop4: summProperty("prop4"),
     prop5: computed(() => {
-      return Math.ceil(list.reduce((a, b) => a + +b["prop5"], 0) / 63);
+      return average("prop4", "prop3");
     }),
     prop6: summProperty("prop6"),
     prop7: computed(() => {
