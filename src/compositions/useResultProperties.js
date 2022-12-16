@@ -23,7 +23,7 @@ export default function async(list) {
   };
   const row = {
     id: "0",
-    name: "Итого <br/> по Республике Башкортостан",
+    name: "Итого по <br/> Республике <br/> Башкортостан",
     prop1: "0",
     prop2: summProperty("prop2"),
     prop3: summProperty("prop3"),
@@ -46,6 +46,18 @@ export default function async(list) {
     prop12: summProperty("prop12"),
     prop13: computed(() => {
       return average("prop12", "prop6");
+    }),
+    prop14: summProperty("prop14"),
+    prop15: computed(() => {
+      return average("prop14", "prop6");
+    }),
+    prop16: summProperty("prop16"),
+    prop17: computed(() => {
+      return average("prop16", "prop6");
+    }),
+    prop18: summProperty("prop18"),
+    prop19: computed(() => {
+      return average("prop18", "prop6");
     }),
   };
   return {

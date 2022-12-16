@@ -109,7 +109,7 @@
         <b class="title"> Республика Башкортостан </b>
       </div>
       <div class="cards">
-        <div class="text-center card-center">
+        <div class="text-center">
           <q-card class="card bg-transparent" flat style="width: 100%">
             <q-card-section
               class="card-title"
@@ -193,7 +193,7 @@
                 { 'card-title__button': !district },
                 { active: sortProp == 'prop9' },
               ]"
-              @click="updateCard('prop9')"
+              @click="updateCard('prop9', 90, 95)"
               :style="[!district ? { cursor: 'pointer' } : '']"
             >
               <!-- sortProp == 'prop9' ? { 'background-color': '#fff' } : '', -->
@@ -219,7 +219,7 @@
                 { 'card-title__button': !district },
                 { active: sortProp == 'prop11' },
               ]"
-              @click="updateCard('prop11')"
+              @click="updateCard('prop11', 50, 70)"
               :style="[!district ? { cursor: 'pointer' } : '']"
             >
               <!-- sortProp == 'prop11' ? { 'background-color': '#fff' } : '', -->
@@ -233,6 +233,33 @@
               <q-skeleton v-if="isLoading" type="rect" />
               <template v-else>
                 <b class="numb"> {{ connections }} </b>
+              </template>
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="text-center q-mb-md">
+          <q-card class="card bg-transparent" flat style="width: 100%">
+            <q-card-section
+              class="card-title"
+              :class="[
+                { 'card-title__button': !district },
+                { active: sortProp == 'prop15' },
+              ]"
+              @click="updateCard('prop15', 50, 60)"
+              :style="[!district ? { cursor: 'pointer' } : '']"
+            >
+              <!-- sortProp == 'prop11' ? { 'background-color': '#fff' } : '', -->
+              <div class="card-text">
+                Прогноз просроченных договоров <br />
+                на конец текущего месяца <br />
+                (% от заключенных договоров)
+              </div>
+            </q-card-section>
+
+            <q-card-section>
+              <q-skeleton v-if="isLoading" type="rect" />
+              <template v-else>
+                <b class="numb"> {{ forecast }} </b>
               </template>
             </q-card-section>
           </q-card>
@@ -253,13 +280,25 @@
           @click="choice = 'table'"
         />
       </div>
-      <div class="row"></div>
+
+      <p class="mailto">
+        Нашли ошибку, напишите
+        <a href="mailto:Kuchumov.AH@bashgaz.ru">Kuchumov.AH@bashgaz.ru</a>
+      </p>
     </div>
   </q-page>
 </template>
 
 <script>
-import Vue, { defineComponent, ref, computed, inject } from "vue";
+import Vue, {
+  defineComponent,
+  ref,
+  computed,
+  inject,
+  onMounted,
+  watch,
+  watchEffect,
+} from "vue";
 import Map from "src/components/CardMap.vue";
 import TableData from "src/components/TableData.vue";
 import ky from "ky";
@@ -302,6 +341,7 @@ export default defineComponent({
         ]);
 
         date.value = requests[0][0].date;
+        //http://devstat.2apps.ru
         // const date = await ky("http://gazstat.danat.su/api/date.php").json();
         // date.value = requests[0].date
         console.log(requests[1]);
@@ -374,6 +414,15 @@ export default defineComponent({
 
     const countTo25 = computed(() => {
       if (list.value.length === 0) return [];
+
+      list.value.filter((item) => {
+        if (item.name === "Шаранский р-н") {
+          console.log(+item[sortProp.value]);
+          console.log(legendData.value.first);
+          console.log(+item[sortProp.value] < legendData.value.first);
+        }
+        return +item[sortProp.value] < legendData.value.first;
+      });
       return list.value
 
         .filter((item) => +item[sortProp.value] < legendData.value.first)
@@ -388,9 +437,10 @@ export default defineComponent({
         .filter(
           (item) =>
             +item[sortProp.value] >= legendData.value.first &&
-            +item[sortProp.value] < legendData.value.last
+            +item[sortProp.value] <= legendData.value.last
         )
         .map((item) => {
+          console.log(item.id == 62);
           return { ...item, to25from50: true };
         });
     });
@@ -400,6 +450,7 @@ export default defineComponent({
 
         .filter((item) => +item[sortProp.value] > legendData.value.last)
         .map((item) => {
+          console.log(item.id == 62);
           return { ...item, to50: true };
         });
     });
@@ -417,6 +468,15 @@ export default defineComponent({
         sortProp.value = property;
       }
     };
+
+    // onMounted(() => {
+    //   if (sortProp.value === "prop9") updateCard(sortProp.value, 65, 80);
+    // });
+    watchEffect(() => {
+      if (list.value.length > 0) {
+        if (sortProp.value === "prop9") updateCard(sortProp.value, 90, 95);
+      }
+    });
 
     return {
       linkXML,
@@ -437,6 +497,9 @@ export default defineComponent({
       }),
       connections: computed(() => {
         return average(data, "prop10", "prop6", "prop11");
+      }),
+      forecast: computed(() => {
+        return average(data, "prop14", "prop6", "prop15");
       }),
       name: computed(() => {
         if (data.value && data.value.length === 1) {
@@ -469,7 +532,7 @@ export default defineComponent({
 <style scoped lang="scss">
 .map__content {
   display: flex;
-  padding: 25px 100px;
+  padding: 25px 10px;
 
   @media (max-width: 780px) {
     padding: 20px;
@@ -599,7 +662,7 @@ export default defineComponent({
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px 30px;
-  margin: 48px 0;
+  margin: 48px 0 20px;
   @media (max-width: 780px) {
     gap: 8px 16px;
     margin: 15px 0;
@@ -635,7 +698,7 @@ export default defineComponent({
 .btn-group {
   display: flex;
   gap: 20px;
-  margin-top: 30px;
+  margin-top: 15px;
 
   @media (max-width: 780px) {
     margin-top: 10px;
@@ -678,6 +741,13 @@ a {
     &:last-child {
       justify-self: start;
     }
+  }
+}
+
+.mailto {
+  margin-top: 15px;
+  & > a {
+    color: #1976d2;
   }
 }
 

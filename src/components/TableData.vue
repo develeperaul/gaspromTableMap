@@ -35,6 +35,13 @@
           <q-td key="prop11" :props="props" v-html="props.row.prop11"> </q-td>
           <q-td key="prop12" :props="props" v-html="props.row.prop12"> </q-td>
           <q-td key="prop13" :props="props" v-html="props.row.prop13"> </q-td>
+
+          <q-td key="prop14" :props="props" v-html="props.row.prop14"> </q-td>
+          <q-td key="prop15" :props="props" v-html="props.row.prop15"> </q-td>
+          <q-td key="prop16" :props="props" v-html="props.row.prop16"> </q-td>
+          <q-td key="prop17" :props="props" v-html="props.row.prop17"> </q-td>
+          <q-td key="prop18" :props="props" v-html="props.row.prop18"> </q-td>
+          <q-td key="prop19" :props="props" v-html="props.row.prop19"> </q-td>
         </q-tr>
       </template>
       <!-- {
@@ -68,12 +75,13 @@ export default {
       {
         name: "name",
         required: true,
-        label: "Район,город",
+        label: "Район, <br/>город",
         align: "left",
         field: (row) => row.name,
         format: (val) => `${val}`,
         sortable: true,
       },
+
       {
         name: "prop2",
         align: "center",
@@ -129,7 +137,7 @@ export default {
       {
         name: "prop9",
         align: "center",
-        label: "% от <br/> закл. договоров",
+        label: "% от <br/> заключенных <br/> договоров",
 
         field: (row) => row.prop9,
         sortable: true,
@@ -162,6 +170,57 @@ export default {
         align: "center",
         label: "% от <br/> заключенных <br/> договоров",
         field: (row) => row.prop13,
+        sortable: true,
+      },
+      {
+        name: "prop14",
+        align: "center",
+        label:
+          "Прогноз <br/> просроченных <br/> договоров <br/> на конец <br/> текущего месяца",
+        field: (row) => row.prop14,
+        format: (val) => `${val}`,
+        sortable: true,
+      },
+      {
+        name: "prop15",
+        align: "center",
+        label: "% <br/> от заключенных <br/> договоров",
+        field: (row) => row.prop15,
+        format: (val) => `${val}`,
+        sortable: true,
+      },
+      {
+        name: "prop16",
+        align: "center",
+        label:
+          "Прогноз <br/> просроченных <br/> договоров <br/> на конец <br/> 2 месяца",
+        field: (row) => row.prop16,
+        format: (val) => `${val}`,
+        sortable: true,
+      },
+      {
+        name: "prop17",
+        align: "center",
+        label: "% <br/> от заключенных <br/> договоров",
+        field: (row) => row.prop17,
+        format: (val) => `${val}`,
+        sortable: true,
+      },
+      {
+        name: "prop18",
+        align: "center",
+        label:
+          "Прогноз<br/> просроченных <br/> договоров на конец <br/> 3 месяца",
+        field: (row) => row.prop18,
+        format: (val) => `${val}`,
+        sortable: true,
+      },
+      {
+        name: "prop19",
+        align: "center",
+        label: "% <br/> от заключенных <br/> договоров",
+        field: (row) => row.prop19,
+        format: (val) => `${val}`,
         sortable: true,
       },
     ];
@@ -213,6 +272,29 @@ export default {
 
   thead tr:first-child th {
     top: 0;
+  }
+
+  td:first-child {
+    background-color: #fff !important;
+  }
+
+  thead tr:first-child th {
+    top: 0;
+    z-index: 1;
+  }
+  tr:first-child th:first-child {
+    /* highest z-index */
+    z-index: 3;
+  }
+
+  td:first-child {
+    z-index: 1;
+  }
+
+  td:first-child,
+  th:first-child {
+    position: sticky;
+    left: 0;
   }
 }
 </style>
